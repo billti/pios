@@ -4,6 +4,12 @@
 start:
     mrs x0, mpidr_el1
     and x0, x0, #3
+// Below is just to test the preprocessor is working.
+#if RASPI_MODEL == 3
+    and x1, x1, #3
+#else
+    and x1, x1, #4
+#endif
     cmp x0, #0
     beq kernel_entry
 

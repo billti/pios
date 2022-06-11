@@ -54,3 +54,10 @@ the right device and baud rate, e.g.
 
 Use `Ctrl-A Ctrl-/` to exit the `screen` application.
 
+## Building
+
+Just run `make` to build the kernel image (the default target) in the `makefile`
+
+By default this will build for Raspberry Pi 4. To build for Raspberry Pi 3, run
+`make RASPI_MODEL=3`. If changing model across builds, run `make clean` inbetween.
+

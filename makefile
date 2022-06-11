@@ -1,36 +1,54 @@
 # https://www.gnu.org/software/make/manual/
 
+# To build for Raspberry Pi 3, run with: make RASPI_MODEL=3
+ifeq ($(RASPI_MODEL), 3)
+	CPU = cortex-a53
+	DIRECTIVES = -D RASPI_MODEL=3
+else
+	CPU = cortex-a72
+	DIRECTIVES = -D RASPI_MODEL=4
+endif
+
 # Use the cross-compiler, not the standard GCC tools
 TOOLCHAIN = aarch64-none-elf
+
+# Default variable names: https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 CC = $(TOOLCHAIN)-gcc
 LD = $(TOOLCHAIN)-ld
-OBJCOPY = $(TOOLCHAIN)-objcopy
 
 # See CPU options at https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
 # Raspberry Pi 3b uses a Cortex-A53. Raspberry Pi 4b uses a Cortex-A72.
-CFLAGS = -mcpu=cortex-a53 -fpic -ffreestanding -g -std=c99
+CFLAGS = -mcpu=$(CPU) -fpic -ffreestanding -g -std=c99 $(DIRECTIVES) -Wall -Wextra
 LFLAGS = -nostdlib
 
-IMG_NAME = kernel8
-OBJ_DIR = obj
+# makefile syntax
+#   $<    = the first prerequisite
+#   $+    = all prerequisites
+#   $?    = all prerequisites newer than the target
+#   $@    = the target
+#   $(@D) = the directory part of the target
 
-$(IMG_NAME).img: $(IMG_NAME).elf
-	$(OBJCOPY) -O binary $< $@
+kernel8.img: kernel8.elf
+	$(TOOLCHAIN)-objcopy -O binary $< $@
 
-$(IMG_NAME).elf: $(OBJ_DIR)/boot.o $(OBJ_DIR)/kernel.o
+kernel8.elf: obj/boot.o obj/kernel.o
 	$(LD) $(LFLAGS) -T link.lds -o $@ $+
 
-$(OBJ_DIR)/boot.o: boot.S
-	mkdir -p $(@D)
-	$(CC) -c $< -o $@
-
-$(OBJ_DIR)/kernel.o: kernel.c
+obj/boot.o: boot.S
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-clean:
-	-rm $(IMG_NAME).img
-	-rm $(IMG_NAME).elf
-	-rm -rf $(OBJ_DIR)
+obj/kernel.o: kernel.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean
+# QEMU support for raspberry pi: https://qemu.readthedocs.io/en/latest/system/arm/raspi.html
+run: kernel8.elf
+	qemu-system-aarch64 -M raspi3b -serial stdio -kernel kernel8.elf
+
+clean:
+	-rm kernel8.img
+	-rm kernel8.elf
+	-rm -rf obj
+
+.PHONY: run clean
