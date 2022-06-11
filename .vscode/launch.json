@@ -1,0 +1,30 @@
+{
+    // Not able to get this working yet :(
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // https://code.visualstudio.com/docs/cpp/launch-json-reference
+            "name": "Debug QEMU",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/kernel8.elf",
+            "args": ["target remote localhost:1234"],
+            "externalConsole": true,
+            "logging": {
+                "moduleLoad": true,
+                "trace": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true,
+                "traceResponse": true
+            },
+            "miDebuggerPath": "aarch64-none-elf-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "debugServerPath": "qemu-system-aarch64",
+            "debugServerArgs": "-s -S -M raspi3b -serial stdio -kernel ${workspaceFolder}/kernel8.elf",
+            "serverStarted": "Starting:",
+            "MIMode": "gdb"
+        }
+    ]
+}

@@ -46,9 +46,15 @@ obj/kernel.o: kernel.c
 run: kernel8.elf
 	qemu-system-aarch64 -M raspi3b -serial stdio -kernel kernel8.elf
 
+debug: kernel8.elf
+	qemu-system-aarch64 -s -S -M raspi3b -serial stdio -kernel kernel8.elf
+
+attach:
+	$(TOOLCHAIN)-gdb -ex "target remote localhost:1234" -ex "b start" -ex "cont" kernel8.elf
+
 clean:
 	-rm kernel8.img
 	-rm kernel8.elf
 	-rm -rf obj
 
-.PHONY: run clean
+.PHONY: run debug clean attach

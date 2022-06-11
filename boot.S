@@ -1,5 +1,6 @@
 .section .text
 .global start
+.type start, %function
 
 start:
     mrs x0, mpidr_el1
