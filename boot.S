@@ -1,23 +1,25 @@
-.section .text
-.global start
-.type start, %function
+	.arch armv8-a+crc
+    .section .text
+	.cfi_sections	.debug_frame
 
+    .global start
+    .type start, %function
 start:
+    .cfi_startproc
     mrs x0, mpidr_el1
     and x0, x0, #3
-// Below is just to test the preprocessor is working.
-#if RASPI_MODEL == 3
-    and x1, x1, #3
-#else
-    and x1, x1, #4
-#endif
     cmp x0, #0
     beq kernel_entry
+    .cfi_endproc
+    .size start, .-start
 
 end:
     b end
 
+    .global kernel_entry
+    .type kernel_entry, %function
 kernel_entry:
+    .cfi_startproc
     // Current exception level should be 2 on startup.
     mrs x0, currentel
     lsr x0, x0, #2
@@ -37,6 +39,8 @@ kernel_entry:
     msr elr_el2, x0
 
     eret
+    .cfi_endproc
+    .size kernel_entry, .-kernel_entry
 
 el1_entry:
     mov sp, #0x80000

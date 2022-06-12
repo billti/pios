@@ -35,6 +35,10 @@ writing with:
 To debug, run with the `-s -S` flags. The first tells QEMU to listen for a GDB
 connection on port 1234, the second tells QEMU not to start the guest until told.
 
+The makefile has targets for these, so run `make run` to launch in the QEMU
+emulator. To debug run `make debug` to launch QEMU with the `-s -S` flags, and
+then in a separate terminal run `make attach` to attach GDB to it.
+
 ## Running on the Raspberry Pi 4
 
 After building, you should have a binary kernel file named `kernel8.img`. If you
@@ -58,6 +62,19 @@ Use `Ctrl-A Ctrl-/` to exit the `screen` application.
 
 Just run `make` to build the kernel image (the default target) in the `makefile`
 
-By default this will build for Raspberry Pi 4. To build for Raspberry Pi 3, run
-`make RASPI_MODEL=3`. If changing model across builds, run `make clean` inbetween.
+By default this will build for Raspberry Pi 3. To build for Raspberry Pi 4, run
+`make RASPI_MODEL=4`. If changing model across builds, run `make clean` inbetween.
 
+## Coding
+
+The code is compiled with GNU using the C99 standard for the C code, and using
+the GNU assembler (GAS) with C preprocessing for the assembly code. (Done by using
+an uppercase '.S' extension and running through the C compiler). By using the
+preprocessor on the assembly code this allows for things such as `#define` and
+`#ifdef` style directives in the assembly code.
+
+# TODO
+Still can't figure out how to get assembly functions to show up in the GNU
+debugger. Tried the directives at https://developer.arm.com/documentation/100748/0618/Assembling-Assembly-Code/How-to-get-a-backtrace-through-assembler-functions?lang=en
+with no luck. (See also stackoverflow posts on topic). May be able to remove the
+`.cfi_*` directives in the assembly if they're not doing anything useful.

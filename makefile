@@ -1,12 +1,12 @@
 # https://www.gnu.org/software/make/manual/
 
-# To build for Raspberry Pi 3, run with: make RASPI_MODEL=3
-ifeq ($(RASPI_MODEL), 3)
-	CPU = cortex-a53
-	DIRECTIVES = -D RASPI_MODEL=3
-else
+# To build for Raspberry Pi 4, run with: make RASPI_MODEL=4
+ifeq ($(RASPI_MODEL), 4)
 	CPU = cortex-a72
 	DIRECTIVES = -D RASPI_MODEL=4
+else
+	CPU = cortex-a53
+	DIRECTIVES = -D RASPI_MODEL=3
 endif
 
 # Use the cross-compiler, not the standard GCC tools
@@ -50,7 +50,7 @@ debug: kernel8.elf
 	qemu-system-aarch64 -s -S -M raspi3b -serial stdio -kernel kernel8.elf
 
 attach:
-	$(TOOLCHAIN)-gdb -ex "target remote localhost:1234" -ex "b start" -ex "cont" kernel8.elf
+	$(TOOLCHAIN)-gdb -ex "target remote localhost:1234" -ex "b kernel_entry" -ex "cont" kernel8.elf
 
 clean:
 	-rm kernel8.img
