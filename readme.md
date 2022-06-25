@@ -78,3 +78,8 @@ Still can't figure out how to get assembly functions to show up in the GNU
 debugger. Tried the directives at https://developer.arm.com/documentation/100748/0618/Assembling-Assembly-Code/How-to-get-a-backtrace-through-assembler-functions?lang=en
 with no luck. (See also stackoverflow posts on topic). May be able to remove the
 `.cfi_*` directives in the assembly if they're not doing anything useful.
+
+Still haven't managed to get VS Code to attach the GDB debugger. Try the extension
+listed at https://marketplace.visualstudio.com/items?itemName=webfreak.debug and
+the docs at https://code.visualstudio.com/docs/cpp/launch-json-reference (also 
+see https://stackoverflow.com/q/54039083/1674945)

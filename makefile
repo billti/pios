@@ -9,6 +9,7 @@ else
 	DIRECTIVES = -D RASPI_MODEL=3
 endif
 
+
 # Use the cross-compiler, not the standard GCC tools
 TOOLCHAIN = aarch64-none-elf
 
@@ -19,7 +20,12 @@ LD = $(TOOLCHAIN)-ld
 # See CPU options at https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
 # Raspberry Pi 3b uses a Cortex-A53. Raspberry Pi 4b uses a Cortex-A72.
 CFLAGS = -mcpu=$(CPU) -fpic -ffreestanding -g -std=c99 $(DIRECTIVES) -Wall -Wextra
-LFLAGS = -nostdlib
+LFLAGS = -nostdlib --discard-none
+
+# Attempt with clang
+CC = /usr/local/bin/clang14/bin/clang
+LD = /usr/local/bin/clang14/bin/ld.lld
+CFLAGS = --target=aarch64-elf -Wall -ffreestanding -g -nostdinc -nostdlib -mcpu=cortex-a53
 
 # makefile syntax
 #   $<    = the first prerequisite
@@ -43,11 +49,12 @@ obj/kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # QEMU support for raspberry pi: https://qemu.readthedocs.io/en/latest/system/arm/raspi.html
-run: kernel8.elf
-	qemu-system-aarch64 -M raspi3b -serial stdio -kernel kernel8.elf
+# Note: Must run the .img not the .elf to boot at the right exception level. See https://stackoverflow.com/a/71006418/1674945
+run: kernel8.img
+	qemu-system-aarch64 -M raspi3b -serial stdio -kernel kernel8.img
 
-debug: kernel8.elf
-	qemu-system-aarch64 -s -S -M raspi3b -serial stdio -kernel kernel8.elf
+debug: kernel8.img
+	qemu-system-aarch64 -s -S -M raspi3b -serial stdio -kernel kernel8.img
 
 attach:
 	$(TOOLCHAIN)-gdb -ex "target remote localhost:1234" -ex "b kernel_entry" -ex "cont" kernel8.elf

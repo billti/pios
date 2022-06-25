@@ -1,4 +1,6 @@
 	.arch armv8-a+crc
+    .file "boot.S"
+    .align 2
     .section .text
 	.cfi_sections	.debug_frame
 
@@ -6,9 +8,11 @@
     .type start, %function
 start:
     .cfi_startproc
+    // The lower byte indicates the thread within the core
     mrs x0, mpidr_el1
-    and x0, x0, #3
+    and x0, x0, #255
     cmp x0, #0
+    # Only enter the kernel for core 0
     beq kernel_entry
     .cfi_endproc
     .size start, .-start
@@ -20,13 +24,17 @@ end:
     .type kernel_entry, %function
 kernel_entry:
     .cfi_startproc
-    // Current exception level should be 2 on startup.
+    // Current exception level should be 2 on startup
+    // Bits 2 & 3 indicate the level
     mrs x0, currentel
     lsr x0, x0, #2
     cmp x0, #2
     bne end
 
+    // TODO: What does this do?
     msr sctlr_el1, xzr
+
+    // Set execution state for EL1 to AArch64
     mov x0, #(1 << 31)
     msr hcr_el2, x0
 
