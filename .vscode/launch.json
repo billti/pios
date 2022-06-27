@@ -3,13 +3,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             // https://code.visualstudio.com/docs/cpp/launch-json-reference
             "name": "Debug QEMU",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/kernel8.elf",
-            "args": ["target remote localhost:1234"],
+            "args": [
+                "target remote localhost:1234"
+            ],
             "externalConsole": true,
             "logging": {
                 "moduleLoad": true,
