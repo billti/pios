@@ -5,16 +5,15 @@ import sys
 import shutil
 import subprocess
 
-# Set to the correct path for the local install
-LLVM_DIR = "/usr/local/bin/clang14/bin"
-
 SRC = ["boot.S", "kernel.c"]
 
-CC = os.path.join(LLVM_DIR, "clang")
-LD = os.path.join(LLVM_DIR, "ld.lld")
-OC = os.path.join(LLVM_DIR, "llvm-objcopy")
+# All this utilities must be installed with LLVM and on the system PATH.
+# Note: Trying to run "ld.lld" without the .exe on Windows fails, but locating the binary with shutil.which works.
+CC = shutil.which("clang")
+LD = shutil.which("ld.lld")
+OC = shutil.which("llvm-objcopy")
 
-if shutil.which(OC) == None:
+if not CC or not LD or not OC:
     raise EnvironmentError("Could not locate llvm binaries")
 
 # Note: llvm-objdump works on the elf file ("llvm-objdump -d kernel8.elf"), but 
@@ -27,8 +26,9 @@ CCARGS = [CC, "-c", "--target=aarch64-elf", "-Wall", "-ffreestanding", "-g", "-n
 LDARGS = [LD, "-nostdlib", "--discard-none", "-T", "link.lds", "-o", "kernel8.elf"] + OBJ
 OCARGS = [OC, "-O", "binary", "kernel8.elf", "kernel8.img"]
 
-# Ensure the project dir is the working dir
-if os.path.dirname(os.path.abspath(__file__)) != os.getcwd():
+# Ensure the project dir is the working dir.
+# Note: Need to use samefile to ignore casing difference on Windows
+if not os.path.samefile(os.path.dirname(os.path.abspath(__file__)), os.getcwd()):
     raise EnvironmentError("Current working directory must be the project directory")
 
 def build():

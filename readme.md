@@ -83,3 +83,26 @@ Still haven't managed to get VS Code to attach the GDB debugger. Try the extensi
 listed at https://marketplace.visualstudio.com/items?itemName=webfreak.debug and
 the docs at https://code.visualstudio.com/docs/cpp/launch-json-reference (also 
 see https://stackoverflow.com/q/54039083/1674945)
+
+# Windows
+
+Install LLVM from the GitHub releases package (e.g. something like 
+<https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.5/LLVM-14.0.5-win64.exe>) which
+should put the necessary binaries (e.g. clang.exe, ld.lld.exe, llvm-objcopy.exe, lldb.exe) on your PATH.
+
+Ensure that Python3 is installed and the directory containing python310.dll is on your path, else LLDB
+will fail to launch.
+
+Run build.bat to compile. To debug, launch QEMU with:
+
+    qemu-system-aarch64 -s -S -M raspi3b -serial stdio -kernel kernel8.img
+
+From a separate command window start a debug session via the below (which sets a breakpoint at 
+`kernel_entry` and runs to it).
+
+    lldb.exe
+    (lldb) file kernel8.elf
+    (lldb) gdb-remote 1234
+    (lldb) b kernel_entry
+    (lldb) c
+
