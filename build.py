@@ -5,7 +5,7 @@ import sys
 import shutil
 import subprocess
 
-SRC = ["boot.S", "kernel.c"]
+SRC = ["boot.S", "lib.S", "uart.c", "kernel.c"]
 
 # All this utilities must be installed with LLVM and on the system PATH.
 # Note: Trying to run "ld.lld" without the .exe on Windows fails, but locating the binary with shutil.which works.
@@ -22,9 +22,14 @@ if not CC or not LD or not OC:
 
 OBJ = [os.path.join("obj", os.path.splitext(file)[0] + ".o") for file in SRC]
 
-CCARGS = [CC, "-c", "--target=aarch64-elf", "-Wall", "-ffreestanding", "-g", "-nostdinc", "-nostdlib", "-mcpu=cortex-a53"]
-LDARGS = [LD, "-nostdlib", "--discard-none", "-T", "link.lds", "-o", "kernel8.elf"] + OBJ
+CCARGS = [CC, "-c", "--target=aarch64-elf", "-Wall", "-ffreestanding", "-g", "-nostdlib", "-mcpu=cortex-a53"]
+LDARGS = [LD, "-nostdlib", "-T", "link.lds", "-o", "kernel8.elf"] + OBJ
 OCARGS = [OC, "-O", "binary", "kernel8.elf", "kernel8.img"]
+
+if "raspi3b" in sys.argv:
+    CCARGS += ["-D", "RASPI3B"]
+else:
+    CCARGS += ["-D", "RASPI4B"]
 
 # Ensure the project dir is the working dir.
 # Note: Need to use samefile to ignore casing difference on Windows

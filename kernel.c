@@ -1,5 +1,9 @@
+#include "uart.h"
+
 void KMain(void)
 {
+    write_string("Hello, world\n");
+    
     while (1) {
         ;
     }

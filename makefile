@@ -3,10 +3,10 @@
 # To build for Raspberry Pi 4, run with: make RASPI_MODEL=4
 ifeq ($(RASPI_MODEL), 4)
 	CPU = cortex-a72
-	DIRECTIVES = -D RASPI_MODEL=4
+	DIRECTIVES = -D RASPI4B
 else
 	CPU = cortex-a53
-	DIRECTIVES = -D RASPI_MODEL=3
+	DIRECTIVES = -D RASPI3B
 endif
 
 
@@ -25,7 +25,7 @@ LFLAGS = -nostdlib --discard-none
 # Attempt with clang
 CC = /usr/local/bin/clang14/bin/clang
 LD = /usr/local/bin/clang14/bin/ld.lld
-CFLAGS = --target=aarch64-elf -Wall -ffreestanding -g -nostdinc -nostdlib -mcpu=cortex-a53
+CFLAGS = --target=aarch64-elf -Wall -ffreestanding -g -nostdlib -mcpu=cortex-a53
 
 # makefile syntax
 #   $<    = the first prerequisite
@@ -37,14 +37,22 @@ CFLAGS = --target=aarch64-elf -Wall -ffreestanding -g -nostdinc -nostdlib -mcpu=
 kernel8.img: kernel8.elf
 	$(TOOLCHAIN)-objcopy -O binary $< $@
 
-kernel8.elf: obj/boot.o obj/kernel.o
+kernel8.elf: obj/boot.o obj/kernel.o obj/lib.o obj/uart.o
 	$(LD) $(LFLAGS) -T link.lds -o $@ $+
 
 obj/boot.o: boot.S
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+obj/lib.o: lib.S
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 obj/kernel.o: kernel.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/uart.o: uart.c
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 

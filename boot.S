@@ -1,21 +1,14 @@
-	.arch armv8-a+crc
-    .file "boot.S"
-    .align 2
     .section .text
-	.cfi_sections	.debug_frame
 
     .global start
     .type start, %function
 start:
-    .cfi_startproc
-    // The lower byte indicates the thread within the core
+    // The lower byte indicates the core id within the cluster
     mrs x0, mpidr_el1
     and x0, x0, #255
     cmp x0, #0
     # Only enter the kernel for core 0
-    beq kernel_entry
-    .cfi_endproc
-    .size start, .-start
+    b.eq kernel_entry
 
 end:
     b end
@@ -23,13 +16,12 @@ end:
     .global kernel_entry
     .type kernel_entry, %function
 kernel_entry:
-    .cfi_startproc
     // Current exception level should be 2 on startup
     // Bits 2 & 3 indicate the level
     mrs x0, currentel
     lsr x0, x0, #2
     cmp x0, #2
-    bne end
+    b.ne end
 
     // TODO: What does this do?
     msr sctlr_el1, xzr
@@ -47,8 +39,6 @@ kernel_entry:
     msr elr_el2, x0
 
     eret
-    .cfi_endproc
-    .size kernel_entry, .-kernel_entry
 
 el1_entry:
     mov sp, #0x80000
